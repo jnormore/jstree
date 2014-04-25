@@ -5697,7 +5697,13 @@
 		 * @name $.jstree.defaults.dnd.inside_pos
 		 * @plugin dnd
 		 */
-		inside_pos : 0
+		inside_pos : 0,
+		/**
+		 * a boolean indicating if nodes from this tree should always be copied with dnd (as opposed to moved) when dragging across trees, default is `false`
+		 * @name $.jstree.defaults.dnd.always_copy_multi
+		 * @plugin dnd
+		 */
+		always_copy_multi : false
 	};
 	// TODO: now check works by checking for each node individually, how about max_children, unique, etc?
 	$.jstree.plugins.dnd = function (options, parent) {
@@ -5750,14 +5756,14 @@
 					marker.attr('class', 'jstree-' + ins.get_theme() + ( ins.settings.core.themes.responsive ? ' jstree-dnd-responsive' : '' ));
 					data.helper
 						.children().attr('class', 'jstree-' + ins.get_theme() + ' jstree-' + ins.get_theme() + '-' + ins.get_theme_variant() + ' ' + ( ins.settings.core.themes.responsive ? ' jstree-dnd-responsive' : '' ))
-						.find('.jstree-copy').first()[ data.data.origin && (data.data.origin.settings.dnd.always_copy || (data.data.origin.settings.dnd.copy && (data.event.metaKey || data.event.ctrlKey))) ? 'show' : 'hide' ]();
+						.find('.jstree-copy').first()[ data.data.origin && (data.data.origin.settings.dnd.always_copy || (data.data.origin.settings.dnd.always_copy_multi && data.data.origin !== ins) || (data.data.origin.settings.dnd.copy && (data.event.metaKey || data.event.ctrlKey))) ? 'show' : 'hide' ]();
 
 
 					// if are hovering the container itself add a new root node
 					if( (data.event.target === ins.element[0] || data.event.target === ins.get_container_ul()[0]) && ins.get_container_ul().children().length === 0) {
 						ok = true;
 						for(t1 = 0, t2 = data.data.nodes.length; t1 < t2; t1++) {
-							ok = ok && ins.check( (data.data.origin && (data.data.origin.settings.dnd.always_copy || (data.data.origin.settings.dnd.copy && (data.event.metaKey || data.event.ctrlKey)) ) ? "copy_node" : "move_node"), (data.data.origin && data.data.origin !== ins ? data.data.origin.get_node(data.data.nodes[t1]) : data.data.nodes[t1]), '#', 'last', { 'dnd' : true, 'ref' : ins.get_node('#'), 'pos' : 'i', 'is_multi' : (data.data.origin && data.data.origin !== ins), 'is_foreign' : (!data.data.origin) });
+							ok = ok && ins.check( (data.data.origin && (data.data.origin.settings.dnd.always_copy || (data.data.origin.settings.dnd.always_copy_multi && data.data.origin !== ins) || (data.data.origin.settings.dnd.copy && (data.event.metaKey || data.event.ctrlKey)) ) ? "copy_node" : "move_node"), (data.data.origin && data.data.origin !== ins ? data.data.origin.get_node(data.data.nodes[t1]) : data.data.nodes[t1]), '#', 'last', { 'dnd' : true, 'ref' : ins.get_node('#'), 'pos' : 'i', 'is_multi' : (data.data.origin && data.data.origin !== ins), 'is_foreign' : (!data.data.origin) });
 							if(!ok) { break; }
 						}
 						if(ok) {
@@ -5808,7 +5814,7 @@
 								}
 								ok = true;
 								for(t1 = 0, t2 = data.data.nodes.length; t1 < t2; t1++) {
-									op = data.data.origin && (data.data.origin.settings.dnd.always_copy || (data.data.origin.settings.dnd.copy && (data.event.metaKey || data.event.ctrlKey))) ? "copy_node" : "move_node";
+									op = data.data.origin && (data.data.origin.settings.dnd.always_copy || (data.data.origin.settings.dnd.always_copy_multi && data.data.origin !== ins) || (data.data.origin.settings.dnd.copy && (data.event.metaKey || data.event.ctrlKey))) ? "copy_node" : "move_node";
 									ps = i;
 									if(op === "move_node" && v === 'a' && (data.data.origin && data.data.origin === ins) && p === ins.get_parent(data.data.nodes[t1])) {
 										pr = ins.get_node(p);
@@ -5860,7 +5866,7 @@
 							nodes[i].instance = data.data.origin;
 						}
 					}
-					lastmv.ins[ data.data.origin && (data.data.origin.settings.dnd.always_copy || (data.data.origin.settings.dnd.copy && (data.event.metaKey || data.event.ctrlKey))) ? 'copy_node' : 'move_node' ](nodes, lastmv.par, lastmv.pos);
+					lastmv.ins[ data.data.origin && (data.data.origin.settings.dnd.always_copy || (data.data.origin.settings.dnd.always_copy_multi && data.data.origin !== lastmv.ins) || (data.data.origin.settings.dnd.copy && (data.event.metaKey || data.event.ctrlKey))) ? 'copy_node' : 'move_node' ](nodes, lastmv.par, lastmv.pos);
 					for(i = 0, j = nodes.length; i < j; i++) {
 						if(nodes[i].instance) {
 							nodes[i].instance = null;
